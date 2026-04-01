@@ -4,240 +4,85 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JD → Competitor Profiles</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #f7f6f3;
-      --surface: #ffffff;
-      --border: #e2e0d9;
-      --border-strong: #c8c5bc;
-      --text: #1a1916;
-      --muted: #6b6860;
-      --hint: #9e9b93;
-      --accent: #1a1916;
-      --info-bg: #eef4fd;
-      --info-text: #1a4a8a;
-      --info-border: #b8d0f5;
-      --warn-bg: #fdf5e6;
-      --warn-text: #7a4d0a;
-      --warn-border: #f5d99a;
-      --success-bg: #edf7ee;
-      --success-text: #1e6b2e;
-      --success-border: #a8ddb0;
-      --danger-bg: #fdf0ef;
-      --danger-text: #8a1a1a;
-      --danger-border: #f5b8b8;
-      --radius: 12px;
-      --radius-sm: 8px;
+      --bg: #f7f6f3; --surface: #ffffff; --border: #e2e0d9; --border-strong: #c8c5bc;
+      --text: #1a1916; --muted: #6b6860; --hint: #9e9b93;
+      --info-bg: #eef4fd; --info-text: #1a4a8a; --info-border: #b8d0f5;
+      --warn-bg: #fdf5e6; --warn-text: #7a4d0a; --warn-border: #f5d99a;
+      --success-bg: #edf7ee; --success-text: #1e6b2e; --success-border: #a8ddb0;
+      --danger-bg: #fdf0ef; --danger-text: #8a1a1a; --danger-border: #f5b8b8;
+      --radius: 12px; --radius-sm: 8px;
     }
-
-    body {
-      font-family: 'Syne', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 2rem 1rem 4rem;
-    }
-
+    body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem 4rem; }
     .container { max-width: 780px; margin: 0 auto; }
-
-    /* Header */
     .header { margin-bottom: 2.5rem; }
-    .header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.8px; line-height: 1.2; }
+    .header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.8px; }
     .header p { font-size: 13px; color: var(--muted); margin-top: 6px; font-family: 'DM Mono', monospace; }
-
-    /* Card */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-bottom: 1rem;
-    }
-
-    /* Tabs */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }
     .tabs { display: flex; border-bottom: 1px solid var(--border); }
-    .tab {
-      padding: 11px 20px;
-      font-size: 13px;
-      font-family: 'DM Mono', monospace;
-      cursor: pointer;
-      background: transparent;
-      border: none;
-      color: var(--muted);
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
-      transition: all 0.15s;
-    }
+    .tab { padding: 11px 20px; font-size: 13px; font-family: 'DM Mono', monospace; cursor: pointer; background: transparent; border: none; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
     .tab:hover { color: var(--text); }
     .tab.active { color: var(--text); border-bottom-color: var(--text); }
-
     .tab-body { padding: 1.25rem; }
-
-    textarea {
-      width: 100%;
-      min-height: 180px;
-      resize: vertical;
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.65;
-      outline: none;
-      transition: border-color 0.15s;
-    }
+    textarea { width: 100%; min-height: 180px; resize: vertical; font-family: 'DM Mono', monospace; font-size: 13px; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); line-height: 1.65; outline: none; transition: border-color 0.15s; }
     textarea:focus { border-color: var(--border-strong); }
     textarea::placeholder { color: var(--hint); }
-
-    /* Upload */
-    .upload-zone {
-      border: 1.5px dashed var(--border-strong);
-      border-radius: var(--radius-sm);
-      padding: 2.5rem;
-      text-align: center;
-      cursor: pointer;
-      background: var(--bg);
-      transition: background 0.15s;
-    }
+    .upload-zone { border: 1.5px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 2.5rem; text-align: center; cursor: pointer; background: var(--bg); transition: background 0.15s; }
     .upload-zone:hover { background: #efede8; }
     .upload-zone input { display: none; }
-    .upload-icon { font-size: 32px; margin-bottom: 10px; }
-    .upload-label { font-size: 14px; color: var(--muted); }
-    .upload-hint { font-size: 12px; color: var(--hint); margin-top: 4px; font-family: 'DM Mono', monospace; }
     .upload-ok { font-size: 13px; color: var(--success-text); margin-top: 8px; font-family: 'DM Mono', monospace; display: none; }
-
-    /* Buttons */
     .btn-row { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 1.5rem; }
-    .btn {
-      padding: 10px 22px;
-      border-radius: var(--radius-sm);
-      font-family: 'Syne', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.15s, background 0.15s;
-      border: 1px solid transparent;
-    }
+    .btn { padding: 10px 22px; border-radius: var(--radius-sm); font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: opacity 0.15s; }
     .btn-primary { background: var(--text); color: #fff; }
     .btn-primary:hover { opacity: 0.85; }
     .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
     .btn-ghost { background: transparent; color: var(--muted); border-color: var(--border-strong); display: none; }
     .btn-ghost:hover { background: var(--bg); }
-
-    /* Loading */
     #loading { display: none; text-align: center; padding: 3rem 0; }
     #loading.show { display: block; }
-    .spinner {
-      width: 36px; height: 36px;
-      border: 2.5px solid var(--border);
-      border-top-color: var(--text);
-      border-radius: 50%;
-      animation: spin 0.75s linear infinite;
-      margin: 0 auto 14px;
-    }
+    .spinner { width: 36px; height: 36px; border: 2.5px solid var(--border); border-top-color: var(--text); border-radius: 50%; animation: spin 0.75s linear infinite; margin: 0 auto 14px; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .load-msg { font-size: 13px; color: var(--muted); font-family: 'DM Mono', monospace; }
-
-    /* Error */
     #error { display: none; padding: 12px 16px; border-radius: var(--radius-sm); background: var(--danger-bg); color: var(--danger-text); font-size: 13px; border: 1px solid var(--danger-border); font-family: 'DM Mono', monospace; margin-bottom: 1rem; }
     #error.show { display: block; }
-
-    /* Analysis bar */
     #analysis { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
     #analysis.show { display: block; }
     .bar-label { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--hint); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 10px; }
     .chips { display: flex; gap: 7px; flex-wrap: wrap; }
-    .chip {
-      font-size: 12px;
-      font-family: 'DM Mono', monospace;
-      padding: 4px 11px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--muted);
-    }
+    .chip { font-size: 12px; font-family: 'DM Mono', monospace; padding: 4px 11px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg); color: var(--muted); }
     .chip.hi { background: var(--info-bg); color: var(--info-text); border-color: var(--info-border); }
     .chip.co { background: var(--warn-bg); color: var(--warn-text); border-color: var(--warn-border); }
-    .chip.sep { background: transparent; border-color: transparent; color: var(--hint); font-size: 11px; padding: 4px 4px; }
-
-    /* Results */
     #results { display: none; }
     #results.show { display: block; }
     .results-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; }
     .results-title { font-size: 17px; font-weight: 700; }
     .results-sub { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--hint); }
-
-    /* Profile cards */
     .profiles { display: flex; flex-direction: column; gap: 10px; }
-    .pcard {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem 1.25rem;
-      display: grid;
-      grid-template-columns: 46px 1fr auto;
-      gap: 0 14px;
-      align-items: start;
-      animation: fadeUp 0.25s ease both;
-    }
+    .pcard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; display: grid; grid-template-columns: 46px 1fr auto; gap: 0 14px; align-items: start; animation: fadeUp 0.25s ease both; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-    .avatar {
-      width: 46px; height: 46px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 14px;
-      flex-shrink: 0;
-    }
+    .avatar { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
     .pname { font-size: 15px; font-weight: 700; margin-bottom: 1px; }
     .prole { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
     .pbadges { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 10px; }
-    .pbadge {
-      font-size: 11px; font-family: 'DM Mono', monospace;
-      padding: 3px 9px; border-radius: 12px;
-      border: 1px solid var(--border); color: var(--muted);
-    }
+    .pbadge { font-size: 11px; font-family: 'DM Mono', monospace; padding: 3px 9px; border-radius: 12px; border: 1px solid var(--border); color: var(--muted); }
     .pbadge.exp { background: var(--success-bg); color: var(--success-text); border-color: var(--success-border); }
-    .reason {
-      font-size: 12px; color: var(--muted); line-height: 1.55;
-      padding: 8px 10px;
-      background: var(--bg);
-      border-radius: var(--radius-sm);
-      border-left: 2px solid var(--border-strong);
-    }
+    .reason { font-size: 12px; color: var(--muted); line-height: 1.55; padding: 8px 10px; background: var(--bg); border-radius: var(--radius-sm); border-left: 2px solid var(--border-strong); }
     .prank { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--hint); margin-bottom: 3px; }
-    .li-btn {
-      font-size: 12px; font-family: 'DM Mono', monospace;
-      color: var(--info-text);
-      text-decoration: none; white-space: nowrap;
-      padding: 5px 11px;
-      border: 1px solid var(--info-border);
-      border-radius: var(--radius-sm);
-      background: var(--info-bg);
-      display: inline-block;
-      transition: opacity 0.15s;
-    }
+    .li-btn { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--info-text); text-decoration: none; white-space: nowrap; padding: 5px 11px; border: 1px solid var(--info-border); border-radius: var(--radius-sm); background: var(--info-bg); display: inline-block; transition: opacity 0.15s; }
     .li-btn:hover { opacity: 0.75; }
-
-    /* Footer */
     .footer { margin-top: 3rem; text-align: center; font-size: 12px; color: var(--hint); font-family: 'DM Mono', monospace; }
   </style>
 </head>
 <body>
 <div class="container">
-
   <div class="header">
     <h1>JD → Competitor Profiles</h1>
     <p>// paste a JD · AI maps the product + competitors · surfaces top 20 profiles</p>
   </div>
 
-  <!-- Input card -->
   <div class="card">
     <div class="tabs">
       <button class="tab active" onclick="switchTab('text')">Paste JD</button>
@@ -250,9 +95,9 @@
       <div id="tab-file" style="display:none;">
         <label class="upload-zone">
           <input type="file" id="file-input" accept=".txt,.doc,.docx" onchange="handleFile(this)" />
-          <div class="upload-icon">📄</div>
-          <div class="upload-label">Click to browse or drop a file</div>
-          <div class="upload-hint">.txt · .doc · .docx &nbsp;|&nbsp; for PDF: copy-paste text into Paste JD tab</div>
+          <div style="font-size:32px;margin-bottom:10px;">📄</div>
+          <div style="font-size:14px;color:var(--muted);">Click to browse or drop a file</div>
+          <div style="font-size:12px;color:var(--hint);margin-top:4px;font-family:'DM Mono',monospace;">.txt · .doc · .docx &nbsp;|&nbsp; for PDF: copy-paste text into Paste JD tab</div>
           <div class="upload-ok" id="file-ok"></div>
         </label>
       </div>
@@ -284,100 +129,65 @@
 </div>
 
 <script>
-  let activeTab = 'text';
-  let uploadedText = '';
-  let loadInterval;
-
-  const avatarPalette = [
-    ['#E6F1FB','#0C447C'], ['#E1F5EE','#085041'], ['#EEEDFE','#3C3489'],
-    ['#FAEEDA','#633806'], ['#FAECE7','#712B13'], ['#FBEAF0','#72243E'],
-    ['#EAF3DE','#27500A'], ['#FCEBEB','#791F1F'], ['#E6F1FB','#185FA5'],
-    ['#E1F5EE','#0F6E56'], ['#EEEDFE','#534AB7'], ['#FAEEDA','#854F0B'],
+  let activeTab = 'text', uploadedText = '', loadInterval;
+  const palette = [
+    ['#E6F1FB','#0C447C'],['#E1F5EE','#085041'],['#EEEDFE','#3C3489'],
+    ['#FAEEDA','#633806'],['#FAECE7','#712B13'],['#FBEAF0','#72243E'],
+    ['#EAF3DE','#27500A'],['#FCEBEB','#791F1F'],['#E6F1FB','#185FA5'],
+    ['#E1F5EE','#0F6E56'],['#EEEDFE','#534AB7'],['#FAEEDA','#854F0B'],
   ];
 
   function switchTab(t) {
     activeTab = t;
-    document.querySelectorAll('.tab').forEach((el, i) =>
-      el.classList.toggle('active', (i === 0 && t === 'text') || (i === 1 && t === 'file'))
-    );
-    document.getElementById('tab-text').style.display = t === 'text' ? 'block' : 'none';
-    document.getElementById('tab-file').style.display = t === 'file' ? 'block' : 'none';
+    document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active',(i===0&&t==='text')||(i===1&&t==='file')));
+    document.getElementById('tab-text').style.display = t==='text'?'block':'none';
+    document.getElementById('tab-file').style.display = t==='file'?'block':'none';
   }
 
   function handleFile(input) {
-    const file = input.files[0]; if (!file) return;
+    const file = input.files[0]; if(!file) return;
     const ok = document.getElementById('file-ok');
-    ok.style.display = 'block'; ok.textContent = '✓ ' + file.name + ' ready';
-    const r = new FileReader();
-    r.onload = e => { uploadedText = e.target.result; };
-    r.readAsText(file);
+    ok.style.display = 'block'; ok.textContent = '✓ '+file.name;
+    new FileReader().onload = e => { uploadedText = e.target.result; };
+    const r = new FileReader(); r.onload = e => { uploadedText = e.target.result; }; r.readAsText(file);
   }
 
-  function getJD() {
-    return activeTab === 'text'
-      ? document.getElementById('jd-text').value.trim()
-      : uploadedText.trim();
-  }
-
-  function initials(name) {
-    return (name || '??').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
-  }
-
-  function showError(msg) {
-    const el = document.getElementById('error');
-    el.textContent = msg; el.classList.add('show');
-  }
+  function getJD() { return activeTab==='text' ? document.getElementById('jd-text').value.trim() : uploadedText.trim(); }
+  function initials(n) { return (n||'??').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+  function showError(m) { const el=document.getElementById('error'); el.textContent=m; el.classList.add('show'); }
   function hideError() { document.getElementById('error').classList.remove('show'); }
 
   function setLoading(on) {
     document.getElementById('loading').classList.toggle('show', on);
     if (on) {
-      const msgs = [
-        'Reading job description...',
-        'Identifying product & team...',
-        'Mapping exact competitors...',
-        'Building 20 profiles...',
-      ];
+      const msgs = ['Reading job description...','Identifying product & team...','Mapping exact competitors...','Building 20 profiles...'];
       let i = 0;
       document.getElementById('load-msg').textContent = msgs[0];
-      loadInterval = setInterval(() => {
-        i = (i + 1) % msgs.length;
-        document.getElementById('load-msg').textContent = msgs[i];
-      }, 2500);
-    } else {
-      clearInterval(loadInterval);
-    }
+      loadInterval = setInterval(() => { i=(i+1)%msgs.length; document.getElementById('load-msg').textContent=msgs[i]; }, 2500);
+    } else { clearInterval(loadInterval); }
   }
 
   async function analyze() {
     hideError();
     const jd = getJD();
-    if (!jd || jd.length < 60) {
-      showError('Please paste a fuller job description so the AI can identify the product and team.');
-      return;
-    }
-
+    if (!jd || jd.length < 60) { showError('Please paste a fuller job description.'); return; }
     document.getElementById('btn-go').disabled = true;
     document.getElementById('btn-reset').style.display = 'inline-block';
     document.getElementById('analysis').classList.remove('show');
     document.getElementById('results').classList.remove('show');
     setLoading(true);
-
     try {
       const resp = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jd }),
       });
-
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || 'Server error');
       if (!data.profiles || !Array.isArray(data.profiles)) throw new Error('Missing profiles in response');
-
       setLoading(false);
       renderAnalysis(data);
       renderProfiles(data);
-
     } catch (err) {
       setLoading(false);
       document.getElementById('btn-go').disabled = false;
@@ -386,70 +196,47 @@
   }
 
   function renderAnalysis(data) {
-    const chips = document.getElementById('chips');
-    chips.innerHTML = '';
-    const add = (t, c) => {
-      const el = document.createElement('span');
-      el.className = 'chip ' + (c || '');
-      el.textContent = t;
-      chips.appendChild(el);
-    };
-    if (data.team) add('Team: ' + data.team, 'hi');
-    if (data.product) add('Product: ' + data.product, 'hi');
-    if (data.level) add('Level: ' + data.level, '');
-    (data.key_requirements || []).forEach(r => add(r, ''));
-    if ((data.competitors || []).length) add('competitors →', 'sep');
-    (data.competitors || []).forEach(c => add(c, 'co'));
+    const chips = document.getElementById('chips'); chips.innerHTML = '';
+    const add = (t,c) => { const el=document.createElement('span'); el.className='chip '+(c||''); el.textContent=t; chips.appendChild(el); };
+    if(data.team) add('Team: '+data.team,'hi');
+    if(data.product) add('Product: '+data.product,'hi');
+    if(data.level) add('Level: '+data.level,'');
+    (data.key_requirements||[]).forEach(r=>add(r,''));
+    if((data.competitors||[]).length) add('competitors →','');
+    (data.competitors||[]).forEach(c=>add(c,'co'));
     document.getElementById('analysis').classList.add('show');
   }
 
   function renderProfiles(data) {
-    const grid = document.getElementById('profiles');
-    grid.innerHTML = '';
-    const list = (data.profiles || []).slice(0, 20);
-
-    list.forEach((p, i) => {
-      const [bg, fg] = avatarPalette[i % avatarPalette.length];
-      const url = p.linkedin_search ||
-        'https://www.linkedin.com/search/results/people/?keywords=' +
-        encodeURIComponent((p.name || '') + ' ' + (p.current_company || ''));
-
-      const card = document.createElement('div');
-      card.className = 'pcard';
-      card.style.animationDelay = (i * 35) + 'ms';
+    const grid = document.getElementById('profiles'); grid.innerHTML='';
+    (data.profiles||[]).slice(0,20).forEach((p,i) => {
+      const [bg,fg] = palette[i%palette.length];
+      const url = p.linkedin_search||('https://www.linkedin.com/search/results/people/?keywords='+encodeURIComponent((p.name||'')+' '+(p.current_company||'')));
+      const card = document.createElement('div'); card.className='pcard'; card.style.animationDelay=(i*35)+'ms';
       card.innerHTML = `
         <div class="avatar" style="background:${bg};color:${fg}">${initials(p.name)}</div>
         <div>
-          <div class="prank">#${p.rank || i + 1}</div>
-          <div class="pname">${p.name || 'Unknown'}</div>
-          <div class="prole">${p.current_role || ''} &middot; ${p.current_company || ''}</div>
-          <div class="pbadges">
-            <span class="pbadge exp">${p.years_exp || '?'} yrs exp</span>
-            <span class="pbadge">${p.current_company || ''}</span>
-          </div>
-          <div class="reason">${p.match_reason || ''}</div>
+          <div class="prank">#${p.rank||i+1}</div>
+          <div class="pname">${p.name||'Unknown'}</div>
+          <div class="prole">${p.current_role||''} &middot; ${p.current_company||''}</div>
+          <div class="pbadges"><span class="pbadge exp">${p.years_exp||'?'} yrs exp</span><span class="pbadge">${p.current_company||''}</span></div>
+          <div class="reason">${p.match_reason||''}</div>
         </div>
-        <div><a class="li-btn" href="${url}" target="_blank" rel="noopener">Search LinkedIn ↗</a></div>
-      `;
+        <div><a class="li-btn" href="${url}" target="_blank" rel="noopener">Search LinkedIn ↗</a></div>`;
       grid.appendChild(card);
     });
-
-    document.getElementById('results-sub').textContent = list.length + ' profiles · AI-generated · verify on LinkedIn';
+    document.getElementById('results-sub').textContent = (data.profiles||[]).length+' profiles · AI-generated';
     document.getElementById('results').classList.add('show');
-    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
   }
 
   function resetAll() {
-    document.getElementById('jd-text').value = '';
-    uploadedText = '';
-    document.getElementById('file-ok').style.display = 'none';
-    document.getElementById('analysis').classList.remove('show');
-    document.getElementById('results').classList.remove('show');
-    document.getElementById('loading').classList.remove('show');
-    document.getElementById('btn-go').disabled = false;
-    document.getElementById('btn-reset').style.display = 'none';
-    hideError();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('jd-text').value=''; uploadedText='';
+    document.getElementById('file-ok').style.display='none';
+    ['analysis','results','loading'].forEach(id=>document.getElementById(id).classList.remove('show'));
+    document.getElementById('btn-go').disabled=false;
+    document.getElementById('btn-reset').style.display='none';
+    hideError(); window.scrollTo({top:0,behavior:'smooth'});
   }
 </script>
 </body>
