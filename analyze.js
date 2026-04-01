@@ -6,7 +6,21 @@ module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { jd } = req.body || {};
+  // Vercel does not auto-parse req.body — read the stream manually
+  let jd;
+  try {
+    const rawBody = await new Promise((resolve, reject) => {
+      let data = "";
+      req.on("data", chunk => { data += chunk.toString(); });
+      req.on("end", () => resolve(data));
+      req.on("error", reject);
+    });
+    const parsed = JSON.parse(rawBody);
+    jd = parsed.jd;
+  } catch (e) {
+    return res.status(400).json({ error: "Bad request body: " + e.message });
+  }
+
   if (!jd || jd.trim().length < 60) {
     return res.status(400).json({ error: "JD text too short" });
   }
@@ -56,7 +70,7 @@ ${jd.slice(0, 4000)}`;
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-opus-4-5",
+        model: "claude-sonnet-4-6",
         max_tokens: 4000,
         messages: [{ role: "user", content: prompt }],
       }),
