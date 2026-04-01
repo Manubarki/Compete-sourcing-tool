@@ -6,7 +6,7 @@ module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { jd } = req.body;
+  const { jd } = req.body || {};
   if (!jd || jd.trim().length < 60) {
     return res.status(400).json({ error: "JD text too short" });
   }
@@ -39,12 +39,10 @@ Use this exact structure:
 }
 
 Critical rules:
-- competitors: ONLY companies that build the EXACT same product/category (not adjacent tools, not customers, not partners). If the JD is for a data catalog role at Atlan, competitors are Alation, Collibra, DataHub — NOT Snowflake or dbt.
-- profiles: generate exactly 20 realistic profiles distributed across the competitor companies
-- years_exp must be an integer number (not a string)
-- match_reason must be specific to the JD requirements, not generic
-- linkedin_search must be a valid LinkedIn people search URL
-- No text, commentary, or markdown outside the JSON object
+- competitors: ONLY companies building the EXACT same product/category
+- profiles: exactly 20, distributed across competitor companies
+- years_exp must be an integer
+- No text or markdown outside the JSON object
 
 Job Description:
 ${jd.slice(0, 4000)}`;
@@ -66,13 +64,12 @@ ${jd.slice(0, 4000)}`;
 
     if (!response.ok) {
       const err = await response.text();
-      return res.status(500).json({ error: "Anthropic API error: " + err.slice(0, 200) });
+      return res.status(500).json({ error: "Anthropic API error: " + err.slice(0, 300) });
     }
 
     const data = await response.json();
     const raw = data.content.filter((b) => b.type === "text").map((b) => b.text).join("");
 
-    // Robust JSON extraction
     let parsed = null;
     try { parsed = JSON.parse(raw); } catch {}
     if (!parsed) {
@@ -91,4 +88,4 @@ ${jd.slice(0, 4000)}`;
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
-}
+};
