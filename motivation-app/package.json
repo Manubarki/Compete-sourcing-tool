@@ -1,0 +1,23 @@
+{
+  "name": "motivation-app",
+  "version": "1.0.0",
+  "description": "AI motivator that reads email, calendar, Slack & Granola to send you personalised encouragement",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "setup": "node setup.js",
+    "send-now": "node src/index.js --once"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.40.0",
+    "@slack/web-api": "^7.0.0",
+    "better-sqlite3": "^9.4.3",
+    "dotenv": "^16.4.5",
+    "googleapis": "^144.0.0",
+    "node-cron": "^3.0.3",
+    "open": "^10.1.0"
+  }
+}
