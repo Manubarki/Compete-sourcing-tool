@@ -74,6 +74,38 @@
     .li-btn { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--info-text); text-decoration: none; white-space: nowrap; padding: 5px 11px; border: 1px solid var(--info-border); border-radius: var(--radius-sm); background: var(--info-bg); display: inline-block; transition: opacity 0.15s; }
     .li-btn:hover { opacity: 0.75; }
     .footer { margin-top: 3rem; text-align: center; font-size: 12px; color: var(--hint); font-family: 'DM Mono', monospace; }
+
+    /* Usage dashboard */
+    #usage-panel { display: none; padding: 1.25rem; }
+    #usage-panel.show { display: block; }
+    .usage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1.25rem; }
+    @media (max-width: 520px) { .usage-grid { grid-template-columns: 1fr; } }
+    .usage-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
+    .usage-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .usage-service { font-size: 12px; font-family: 'DM Mono', monospace; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+    .usage-status { font-size: 10px; font-family: 'DM Mono', monospace; padding: 2px 7px; border-radius: 10px; }
+    .usage-status.active { background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); }
+    .usage-status.idle   { background: var(--bg); color: var(--hint); border: 1px solid var(--border); }
+    .usage-stat { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; padding: 3px 0; border-bottom: 1px solid var(--border); }
+    .usage-stat:last-child { border-bottom: none; }
+    .usage-stat-val { color: var(--text); font-weight: 500; }
+    .usage-total { background: var(--info-bg); border: 1px solid var(--info-border); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .usage-total-label { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--info-text); }
+    .usage-total-val { font-size: 18px; font-weight: 700; color: var(--info-text); }
+    .usage-log-title { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--hint); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; }
+    .usage-log { max-height: 220px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+    .log-row { display: grid; grid-template-columns: 90px 60px 55px 1fr; gap: 8px; padding: 6px 10px; font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); border-bottom: 1px solid var(--border); align-items: center; }
+    .log-row:last-child { border-bottom: none; }
+    .log-row:nth-child(even) { background: var(--bg); }
+    .log-svc { color: var(--text); font-weight: 500; }
+    .log-ok  { color: var(--success-text); }
+    .log-err { color: var(--danger-text); }
+    .usage-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+    .usage-updated { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--hint); }
+    .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: var(--radius-sm); font-family: 'DM Mono', monospace; cursor: pointer; border: 1px solid var(--border-strong); background: transparent; color: var(--muted); }
+    .btn-sm:hover { background: var(--bg); }
+    .btn-sm.danger { color: var(--danger-text); border-color: var(--danger-border); }
+    .btn-sm.danger:hover { background: var(--danger-bg); }
   </style>
 </head>
 <body>
@@ -87,6 +119,7 @@
     <div class="tabs">
       <button class="tab active" onclick="switchTab('text')">Paste JD</button>
       <button class="tab" onclick="switchTab('file')">Upload file</button>
+      <button class="tab" onclick="switchTab('usage')">Usage</button>
     </div>
     <div class="tab-body">
       <div id="tab-text">
@@ -100,6 +133,24 @@
           <div style="font-size:12px;color:var(--hint);margin-top:4px;font-family:'DM Mono',monospace;">.txt · .doc · .docx &nbsp;|&nbsp; for PDF: copy-paste text into Paste JD tab</div>
           <div class="upload-ok" id="file-ok"></div>
         </label>
+      </div>
+      <div id="tab-usage" style="display:none;">
+        <div id="usage-panel">
+          <div class="usage-total">
+            <span class="usage-total-label">estimated total cost</span>
+            <span class="usage-total-val" id="u-total-cost">$0.000000</span>
+          </div>
+          <div class="usage-grid" id="usage-grid"></div>
+          <div class="usage-log-title">recent calls</div>
+          <div class="usage-log" id="usage-log-body"></div>
+          <div class="usage-actions">
+            <span class="usage-updated" id="u-last-updated">never updated</span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn-sm" onclick="loadUsage()">Refresh</button>
+              <button class="btn-sm danger" onclick="resetUsage()">Reset stats</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -139,9 +190,11 @@
 
   function switchTab(t) {
     activeTab = t;
-    document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active',(i===0&&t==='text')||(i===1&&t==='file')));
+    document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active',(i===0&&t==='text')||(i===1&&t==='file')||(i===2&&t==='usage')));
     document.getElementById('tab-text').style.display = t==='text'?'block':'none';
     document.getElementById('tab-file').style.display = t==='file'?'block':'none';
+    document.getElementById('tab-usage').style.display = t==='usage'?'block':'none';
+    if (t === 'usage') loadUsage();
   }
 
   function handleFile(input) {
@@ -229,6 +282,89 @@
     document.getElementById('results').classList.add('show');
     document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
   }
+
+  // ── Usage dashboard ────────────────────────────────────────────────
+  const SERVICE_META = {
+    claude:  { label: 'Claude API',  color: '#0C447C' },
+    serper:  { label: 'Serper API',  color: '#085041' },
+    github:  { label: 'GitHub API',  color: '#3C3489' },
+    litellm: { label: 'LiteLLM',     color: '#633806' },
+  };
+
+  function fmt$(n) { return '$' + (n||0).toFixed(6); }
+  function fmtNum(n) { return (n||0).toLocaleString(); }
+
+  function buildUsageCard(svc, data) {
+    const meta = SERVICE_META[svc] || { label: svc, color: '#6b6860' };
+    const isActive = (data.requests || 0) > 0;
+    const rows = [
+      ['requests', fmtNum(data.requests)],
+      ['errors',   fmtNum(data.errors)],
+    ];
+    if ('input_tokens' in data)  rows.push(['input tokens',  fmtNum(data.input_tokens)]);
+    if ('output_tokens' in data) rows.push(['output tokens', fmtNum(data.output_tokens)]);
+    if ('cost_usd' in data)      rows.push(['est. cost', fmt$(data.cost_usd)]);
+
+    return `<div class="usage-card">
+      <div class="usage-card-header">
+        <span class="usage-service" style="color:${meta.color}">${meta.label}</span>
+        <span class="usage-status ${isActive?'active':'idle'}">${isActive?'active':'idle'}</span>
+      </div>
+      ${rows.map(([k,v])=>`<div class="usage-stat"><span>${k}</span><span class="usage-stat-val">${v}</span></div>`).join('')}
+    </div>`;
+  }
+
+  function buildLogRow(call) {
+    const ts = call.ts ? new Date(call.ts).toLocaleTimeString() : '—';
+    const statusCls = call.status === 'ok' ? 'log-ok' : 'log-err';
+    const tokens = (call.input_tokens != null)
+      ? `${fmtNum(call.input_tokens)}↑ ${fmtNum(call.output_tokens)}↓`
+      : (call.endpoint || call.query || '');
+    const cost = call.cost_usd ? fmt$(call.cost_usd) : '';
+    return `<div class="log-row">
+      <span>${ts}</span>
+      <span class="log-svc">${call.service||''}</span>
+      <span class="${statusCls}">${call.status||''}</span>
+      <span style="color:var(--hint)">${tokens}${cost ? ' · '+cost : ''}</span>
+    </div>`;
+  }
+
+  async function loadUsage() {
+    try {
+      const resp = await fetch('/api/usage');
+      if (!resp.ok) return;
+      const data = await resp.json();
+
+      document.getElementById('u-total-cost').textContent = fmt$(data.total_cost_usd);
+
+      const grid = document.getElementById('usage-grid');
+      grid.innerHTML = ['claude','serper','github','litellm']
+        .map(svc => buildUsageCard(svc, data[svc] || {}))
+        .join('');
+
+      const log = document.getElementById('usage-log-body');
+      const calls = data.calls || [];
+      log.innerHTML = calls.length
+        ? calls.map(buildLogRow).join('')
+        : '<div class="log-row" style="color:var(--hint);grid-column:1/-1">no calls recorded yet</div>';
+
+      const el = document.getElementById('u-last-updated');
+      el.textContent = data.last_updated
+        ? 'updated ' + new Date(data.last_updated).toLocaleTimeString()
+        : 'never updated';
+
+      document.getElementById('usage-panel').classList.add('show');
+    } catch (e) {
+      console.error('Usage fetch failed:', e);
+    }
+  }
+
+  async function resetUsage() {
+    if (!confirm('Reset all usage stats?')) return;
+    await fetch('/api/usage', { method: 'DELETE' });
+    loadUsage();
+  }
+  // ── End usage dashboard ─────────────────────────────────────────────
 
   function resetAll() {
     document.getElementById('jd-text').value=''; uploadedText='';

@@ -1,3 +1,5 @@
+const { trackClaude } = require("./tracker");
+
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -78,10 +80,12 @@ ${jd.slice(0, 4000)}`;
 
     if (!response.ok) {
       const err = await response.text();
+      trackClaude(null, true);
       return res.status(500).json({ error: "Anthropic API error: " + err.slice(0, 300) });
     }
 
     const data = await response.json();
+    trackClaude(data);
     const raw = data.content.filter((b) => b.type === "text").map((b) => b.text).join("");
 
     let parsed = null;
@@ -100,6 +104,7 @@ ${jd.slice(0, 4000)}`;
 
     return res.status(200).json(parsed);
   } catch (err) {
+    trackClaude(null, true);
     return res.status(500).json({ error: err.message });
   }
 };
