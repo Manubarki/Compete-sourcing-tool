@@ -1,7 +1,9 @@
 const fs = require("fs");
+const os = require("os");
+const path = require("path");
 
-// /tmp is writable on Vercel; data is ephemeral (cleared on cold starts)
-const STORAGE_PATH = "/tmp/usage-stats.json";
+// Cross-platform writable temp dir (works on Vercel, Mac, Windows, Linux)
+const STORAGE_PATH = path.join(os.tmpdir(), "jd-sourcing-usage-stats.json");
 
 // Cost per unit (USD) — update as pricing changes
 const COSTS = {

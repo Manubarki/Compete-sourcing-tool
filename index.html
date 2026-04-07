@@ -75,6 +75,22 @@
     .li-btn:hover { opacity: 0.75; }
     .footer { margin-top: 3rem; text-align: center; font-size: 12px; color: var(--hint); font-family: 'DM Mono', monospace; }
 
+    /* Electron mode badge */
+    .electron-badge { display: none; font-size: 10px; font-family: 'DM Mono', monospace; padding: 3px 9px; border-radius: 10px; background: var(--success-bg); color: var(--success-text); border: 1px solid var(--success-border); vertical-align: middle; margin-left: 10px; }
+    body.is-electron .electron-badge { display: inline; }
+
+    /* Settings tab */
+    #tab-settings { display: none; }
+    .settings-section { padding: 1.25rem; }
+    .settings-group { margin-bottom: 1.5rem; }
+    .settings-label { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--hint); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; display: block; }
+    .settings-input { width: 100%; font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
+    .settings-input:focus { border-color: var(--border-strong); }
+    .settings-hint { font-size: 11px; color: var(--hint); font-family: 'DM Mono', monospace; margin-top: 5px; }
+    .settings-save-row { display: flex; align-items: center; gap: 12px; }
+    .settings-saved { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--success-text); display: none; }
+    .settings-saved.show { display: inline; }
+
     /* Usage dashboard */
     #usage-panel { display: none; padding: 1.25rem; }
     #usage-panel.show { display: block; }
@@ -111,7 +127,7 @@
 <body>
 <div class="container">
   <div class="header">
-    <h1>JD → Competitor Profiles</h1>
+    <h1>JD → Competitor Profiles <span class="electron-badge">desktop</span></h1>
     <p>// paste a JD · AI maps the product + competitors · surfaces top 20 profiles</p>
   </div>
 
@@ -120,6 +136,7 @@
       <button class="tab active" onclick="switchTab('text')">Paste JD</button>
       <button class="tab" onclick="switchTab('file')">Upload file</button>
       <button class="tab" onclick="switchTab('usage')">Usage</button>
+      <button class="tab electron-only" onclick="switchTab('settings')" style="display:none;">Settings</button>
     </div>
     <div class="tab-body">
       <div id="tab-text">
@@ -134,6 +151,20 @@
           <div class="upload-ok" id="file-ok"></div>
         </label>
       </div>
+      <div id="tab-settings" style="display:none;">
+        <div class="settings-section">
+          <div class="settings-group">
+            <label class="settings-label" for="sk-anthropic">Anthropic API Key</label>
+            <input class="settings-input" id="sk-anthropic" type="password" placeholder="sk-ant-..." autocomplete="off" />
+            <p class="settings-hint">Stored locally in your app data folder. Never sent anywhere except Anthropic.</p>
+          </div>
+          <div class="settings-save-row">
+            <button class="btn btn-primary" style="padding:8px 18px;font-size:13px;" onclick="saveSettings()">Save</button>
+            <span class="settings-saved" id="settings-saved">Saved.</span>
+          </div>
+        </div>
+      </div>
+
       <div id="tab-usage" style="display:none;">
         <div id="usage-panel">
           <div class="usage-total">
@@ -180,6 +211,12 @@
 </div>
 
 <script>
+  const IS_ELECTRON = typeof window.electronAPI !== 'undefined';
+  if (IS_ELECTRON) {
+    document.body.classList.add('is-electron');
+    document.querySelectorAll('.electron-only').forEach(el => el.style.display = '');
+  }
+
   let activeTab = 'text', uploadedText = '', loadInterval;
   const palette = [
     ['#E6F1FB','#0C447C'],['#E1F5EE','#085041'],['#EEEDFE','#3C3489'],
@@ -190,11 +227,16 @@
 
   function switchTab(t) {
     activeTab = t;
-    document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active',(i===0&&t==='text')||(i===1&&t==='file')||(i===2&&t==='usage')));
-    document.getElementById('tab-text').style.display = t==='text'?'block':'none';
-    document.getElementById('tab-file').style.display = t==='file'?'block':'none';
-    document.getElementById('tab-usage').style.display = t==='usage'?'block':'none';
+    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    const tabIndex = ['text','file','usage','settings'].indexOf(t);
+    const visibleTabs = document.querySelectorAll('.tab');
+    if (visibleTabs[tabIndex]) visibleTabs[tabIndex].classList.add('active');
+    ['text','file','settings','usage'].forEach(id => {
+      const el = document.getElementById('tab-' + id);
+      if (el) el.style.display = t === id ? 'block' : 'none';
+    });
     if (t === 'usage') loadUsage();
+    if (t === 'settings') loadSettings();
   }
 
   function handleFile(input) {
@@ -230,13 +272,18 @@
     document.getElementById('results').classList.remove('show');
     setLoading(true);
     try {
-      const resp = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jd }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || 'Server error');
+      let data;
+      if (IS_ELECTRON) {
+        data = await window.electronAPI.analyze(jd);
+      } else {
+        const resp = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jd }),
+        });
+        data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || 'Server error');
+      }
       if (!data.profiles || !Array.isArray(data.profiles)) throw new Error('Missing profiles in response');
       setLoading(false);
       renderAnalysis(data);
@@ -331,9 +378,10 @@
 
   async function loadUsage() {
     try {
-      const resp = await fetch('/api/usage');
-      if (!resp.ok) return;
-      const data = await resp.json();
+      const data = IS_ELECTRON
+        ? await window.electronAPI.getUsage()
+        : await fetch('/api/usage').then(r => r.ok ? r.json() : null);
+      if (!data) return;
 
       document.getElementById('u-total-cost').textContent = fmt$(data.total_cost_usd);
 
@@ -361,8 +409,28 @@
 
   async function resetUsage() {
     if (!confirm('Reset all usage stats?')) return;
-    await fetch('/api/usage', { method: 'DELETE' });
+    if (IS_ELECTRON) {
+      await window.electronAPI.resetUsage();
+    } else {
+      await fetch('/api/usage', { method: 'DELETE' });
+    }
     loadUsage();
+  }
+
+  // ── Settings (Electron only) ────────────────────────────────────────────
+  async function loadSettings() {
+    if (!IS_ELECTRON) return;
+    const cfg = await window.electronAPI.getConfig();
+    document.getElementById('sk-anthropic').value = cfg.anthropicApiKey || '';
+  }
+
+  async function saveSettings() {
+    if (!IS_ELECTRON) return;
+    const cfg = { anthropicApiKey: document.getElementById('sk-anthropic').value.trim() };
+    await window.electronAPI.saveConfig(cfg);
+    const saved = document.getElementById('settings-saved');
+    saved.classList.add('show');
+    setTimeout(() => saved.classList.remove('show'), 2000);
   }
   // ── End usage dashboard ─────────────────────────────────────────────
 
