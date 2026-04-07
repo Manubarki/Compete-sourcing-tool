@@ -1,14 +1,9 @@
 {
   "name": "jd-sourcing-tool",
   "version": "1.0.0",
-  "description": "JD → Competitor Profiles — desktop sourcing tool",
-  "main": "main.js",
-  "engines": { "node": ">=18.0.0" },
+  "description": "JD → Competitor Profiles — AI sourcing tool",
   "scripts": {
-    "start": "electron .",
-    "dev":   "electron . --enable-logging"
+    "start": "node server.js"
   },
-  "devDependencies": {
-    "electron": "^33.0.0"
-  }
+  "engines": { "node": ">=18.0.0" }
 }
