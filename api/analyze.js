@@ -6,7 +6,6 @@ module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  // Vercel does not auto-parse req.body — read the stream manually
   let jd;
   try {
     const rawBody = await new Promise((resolve, reject) => {
@@ -30,33 +29,21 @@ module.exports = async function handler(req, res) {
 
   const prompt = `You are a senior technical recruiter. Analyse this job description carefully.
 
-Return ONLY a raw JSON object. No markdown, no backticks, no explanation before or after. Start with { and end with }.
+Return ONLY a raw JSON object. No markdown, no backticks, no explanation. Start with { end with }.
 
-Use this exact structure:
 {
   "team": "team name e.g. Data Platform, ML Infra, Growth Engineering",
-  "product": "specific product area e.g. Data Catalog, Observability Pipeline",
-  "level": "seniority level e.g. Senior, Staff, L5, Principal",
-  "key_requirements": ["requirement 1", "requirement 2", "requirement 3", "requirement 4", "requirement 5"],
-  "competitors": ["Company1", "Company2", "Company3", "Company4", "Company5"],
-  "profiles": [
-    {
-      "rank": 1,
-      "name": "First Last",
-      "current_role": "Job Title",
-      "current_company": "Company",
-      "years_exp": 6,
-      "match_reason": "2-3 sentences explaining why this person is a strong match — reference specific skills, tech, or experience from the JD.",
-      "linkedin_search": "https://www.linkedin.com/search/results/people/?keywords=First+Last+Company"
-    }
-  ]
+  "product": "specific product area e.g. Data Catalog, Query Engine, Observability Pipeline",
+  "level": "seniority level e.g. Senior, Staff, Principal, Director",
+  "key_requirements": ["req 1", "req 2", "req 3", "req 4", "req 5"],
+  "search_keywords": ["2-3 short skill/tech keywords best for LinkedIn search e.g. dbt, spark, data catalog"],
+  "competitors": ["Company1", "Company2", "Company3", "Company4", "Company5"]
 }
 
-Critical rules:
-- competitors: ONLY companies building the EXACT same product/category
-- profiles: exactly 20, distributed across competitor companies
-- years_exp must be an integer
-- No text or markdown outside the JSON object
+Rules:
+- competitors: ONLY companies building the EXACT same product/category (not general tech companies)
+- search_keywords: short terms a recruiter types on LinkedIn to find this person
+- No text outside the JSON
 
 Job Description:
 ${jd.slice(0, 4000)}`;
@@ -71,7 +58,7 @@ ${jd.slice(0, 4000)}`;
       },
       body: JSON.stringify({
         model: "claude-sonnet-4-6",
-        max_tokens: 4000,
+        max_tokens: 800,
         messages: [{ role: "user", content: prompt }],
       }),
     });
@@ -82,7 +69,7 @@ ${jd.slice(0, 4000)}`;
     }
 
     const data = await response.json();
-    const raw = data.content.filter((b) => b.type === "text").map((b) => b.text).join("");
+    const raw = data.content.filter(b => b.type === "text").map(b => b.text).join("");
 
     let parsed = null;
     try { parsed = JSON.parse(raw); } catch {}
@@ -94,7 +81,7 @@ ${jd.slice(0, 4000)}`;
       const a = raw.indexOf("{"), b = raw.lastIndexOf("}");
       if (a !== -1 && b > a) try { parsed = JSON.parse(raw.slice(a, b + 1)); } catch {}
     }
-    if (!parsed || !Array.isArray(parsed.profiles)) {
+    if (!parsed || !parsed.competitors) {
       return res.status(500).json({ error: "Could not parse AI response", raw: raw.slice(0, 500) });
     }
 
